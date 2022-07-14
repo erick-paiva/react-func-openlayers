@@ -1,56 +1,59 @@
-import './App.css';
+import "./App.css";
 
-// react
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-// openlayers
-import GeoJSON from 'ol/format/GeoJSON'
-import Feature from 'ol/Feature';
+import GeoJSON from "ol/format/GeoJSON";
 
-// components
-import MapWrapper from './components/MapWrapper'
+import MapWrapper from "./components/MapWrapper";
+import MarkerImage from "./assets/marker.png";
+import "./map.css";
 
 function App() {
-  
-  // set intial state
-  const [ features, setFeatures ] = useState([])
+  const [features, setFeatures] = useState([]);
 
-  // initialization - retrieve GeoJSON features from Mock JSON API get features from mock 
-  //  GeoJson API (read from flat .json file in public directory)
-  useEffect( () => {
+  const [exibir, setExibir] = useState(false);
 
-    fetch('/mock-geojson-api.json')
-      .then(response => response.json())
-      .then( (fetchedFeatures) => {
-
-        // parse fetched geojson into OpenLayers features
-        //  use options to convert feature from EPSG:4326 to EPSG:3857
+  useEffect(() => {
+    fetch("/mock-geojson-api.json")
+      .then((response) => response.json())
+      .then((fetchedFeatures) => {
         const wktOptions = {
-          dataProjection: 'EPSG:4326',
-          featureProjection: 'EPSG:3857'
-        }
-        const parsedFeatures = new GeoJSON().readFeatures(fetchedFeatures, wktOptions)
+          dataProjection: "EPSG:4326",
+          featureProjection: "EPSG:3857",
+        };
+        const parsedFeatures = new GeoJSON().readFeatures(
+          fetchedFeatures,
+          wktOptions
+        );
 
-        // set features into state (which will be passed into OpenLayers
-        //  map component as props)
-        setFeatures(parsedFeatures)
+        setFeatures(parsedFeatures);
+      });
+  }, []);
 
-      })
+  const callback = (hdms) => {
+    console.log(hdms, "fff");
+    setExibir(true);
+  };
 
-  },[])
-  
+  console.log(MarkerImage, "d");
   return (
     <div className="App">
-      
-      <div className="app-label">
-        <p>React Functional Components with OpenLayers Example</p>
-        <p>Click the map to reveal location coordinate via React State</p>
+      <div id="popup" className="ol-popup">
+        <div id="popup-content">
+          {exibir && (
+            <div
+              className="marker"
+              style={{
+                backgroundImage: `url(${MarkerImage})`,
+              }}
+            />
+          )}
+        </div>
       </div>
-      
-      <MapWrapper features={features} />
 
+      <MapWrapper callback={callback} features={features} />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
